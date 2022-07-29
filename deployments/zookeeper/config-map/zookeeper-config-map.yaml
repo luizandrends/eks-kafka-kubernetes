@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-config
+data:
+  ALLOW_ANONYMOUS_LOGIN: "yes"
+  JVM_OPTS: "-Xms32M -XX:MaxRAM=1000M"

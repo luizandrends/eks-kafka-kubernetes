@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  template:
+    metadata:
+      name: kafka
+      labels:
+        app: kafka
+    spec:
+      containers:
+      - name: kafka-container
+        image: bitnami/kafka:latest
+        env:
+        - name: KAFKA_BROKER_ID
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BROKER_ID
+        - name: ALLOW_PLAINTEXT_LISTENER
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: ALLOW_PLAINTEXT_LISTENER
+        - name: JVM_OPTS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: JVM_OPTS
+        - name: KAFKA_LISTENERS
+          valueFrom:
+            secretKeyRef:
+              name: kafka-secret
+              key: KAFKA_LISTENERS
+        - name: KAFKA_ADVERTISED_LISTENERS
+          valueFrom:
+            secretKeyRef:
+              name: kafka-secret
+              key: KAFKA_ADVERTISED_LISTENERS
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          valueFrom:
+            secretKeyRef:
+              name: kafka-secret
+              key: KAFKA_ZOOKEEPER_CONNECT
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: amd
+                operator: In
+                values:
+                - "true"
+  replicas: 5
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: kafka

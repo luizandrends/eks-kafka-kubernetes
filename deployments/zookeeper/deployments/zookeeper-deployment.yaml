@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+  labels:
+    app: zookeeper
+spec:
+  template:
+    metadata:
+      name: zookeeper
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper-container
+        image: bitnami/zookeeper:latest
+        env:
+        - name: ALLOW_ANONYMOUS_LOGIN
+          valueFrom:
+            configMapKeyRef:
+              name: zookeeper-config
+              key: ALLOW_ANONYMOUS_LOGIN
+        - name: JVM_OPTS
+          valueFrom:
+            configMapKeyRef:
+              name: zookeeper-config
+              key: JVM_OPTS
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: amd
+                operator: In
+                values:
+                - "true"
+  replicas: 5
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: zookeeper

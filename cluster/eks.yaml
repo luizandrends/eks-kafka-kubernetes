@@ -1,0 +1,31 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: kafka-kubernetes-eks
+  region: us-east-1
+nodeGroups:
+  - name: arm-workers
+    labels: { graviton: "true" }
+    instanceType: m6g.large
+    desiredCapacity: 2
+    tags:
+      project: kafka-eks
+      team: backend
+    taints:
+    - key: node-role.graviton/schedule
+      value: "true"
+      effect: NoSchedule
+    availabilityZones: ['us-east-1c', 'us-east-1d']
+  - name: amd-workers
+    labels: { amd: "true" }
+    instanceType: t2.large
+    desiredCapacity: 2
+    tags:
+      project: kafka-eks
+      team: backend
+    availabilityZones: ['us-east-1c', 'us-east-1d']
+cloudWatch:
+    clusterLogging:
+        enableTypes: ["audit", "authenticator", "controllerManager"]
+availabilityZones: ['us-east-1c', 'us-east-1d']
